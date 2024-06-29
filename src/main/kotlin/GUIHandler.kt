@@ -19,6 +19,8 @@ class GUIHandler(private val composableScope: CoroutineScope, private val udpHan
     private val itemHeight = 70.dp
     private val itemPadding = 8.dp
 
+    private val DEG_TO_RADIANS = 57.29577f
+
     @Composable
     fun initBody() {
         Scaffold(
@@ -81,21 +83,83 @@ class GUIHandler(private val composableScope: CoroutineScope, private val udpHan
 
             Row {
                 var imuID = 0
+                var rotX = 0f
+                var rotY = 0f
+                var rotZ = 0f
 
-                suspend fun rotate(): String {
-                    // TODO currently a random rotation for testing purposes
-                    val rand = Random(System.currentTimeMillis())
-                    return udpHandler.rotateIMU(
+                suspend fun setRotation(): String {
+                    return udpHandler.setImuRotation(
                         imuID,
-                        Quaternion(rand.nextFloat(), rand.nextFloat(), rand.nextFloat(), rand.nextFloat()).unit()
+                        EulerAngles(EulerOrder.YZX, rotX / DEG_TO_RADIANS, rotY / DEG_TO_RADIANS, rotZ / DEG_TO_RADIANS).toQuaternion()
                     )
                 }
-                createButton("Set rotation", null, ::rotate)
+                createButton("Set rotation", null, ::setRotation)
 
                 fun imuIDChanged(value: String) {
                     imuID = value.toIntOrNull() ?: 0
                 }
                 createInput("IMU ID", imuID.toString(), ::imuIDChanged)
+
+                fun rotXChanged(value: String) {
+                    rotX = value.toFloatOrNull() ?: 0f
+                }
+                createInput("Rotation X", rotX.toString(), ::rotXChanged)
+
+                fun rotYChanged(value: String) {
+                    rotY = value.toFloatOrNull() ?: 0f
+                }
+                createInput("Rotation Y", rotY.toString(), ::rotYChanged)
+
+                fun rotZChanged(value: String) {
+                    rotZ = value.toFloatOrNull() ?: 0f
+                }
+                createInput("Rotation Z", rotZ.toString(), ::rotZChanged)
+            }
+
+            Row {
+                var imuID = 0
+                var flexResistance = 0f
+
+                suspend fun setResistance(): String {
+                    return udpHandler.setImuFlexResistance(
+                        imuID,
+                        flexResistance
+                    )
+                }
+                createButton("Set flex resistance", null, ::setResistance)
+
+                fun imuIDChanged(value: String) {
+                    imuID = value.toIntOrNull() ?: 0
+                }
+                createInput("IMU ID", imuID.toString(), ::imuIDChanged)
+
+                fun flexResistanceChanged(value: String) {
+                    flexResistance = value.toFloatOrNull() ?: 0f
+                }
+                createInput("Resistance (Ω)", flexResistance.toString(), ::flexResistanceChanged)
+            }
+
+            Row {
+                var imuID = 0
+                var flexAngle = 0f
+
+                suspend fun setAngle(): String {
+                    return udpHandler.setImuFlexAngle(
+                        imuID,
+                        flexAngle / DEG_TO_RADIANS
+                    )
+                }
+                createButton("Set flex angle", null, ::setAngle)
+
+                fun imuIDChanged(value: String) {
+                    imuID = value.toIntOrNull() ?: 0
+                }
+                createInput("IMU ID", imuID.toString(), ::imuIDChanged)
+
+                fun flexAngleChanged(value: String) {
+                    flexAngle = value.toFloatOrNull() ?: 0f
+                }
+                createInput("Angle (deg)", flexAngle.toString(), ::flexAngleChanged)
             }
         }
     }
@@ -203,7 +267,7 @@ class GUIHandler(private val composableScope: CoroutineScope, private val udpHan
 
         Column {
             OutlinedTextField(
-                modifier = Modifier.width(itemWidth).height(itemHeight).padding(itemPadding),
+                modifier = Modifier.width(itemWidth/1.22f).height(itemHeight).padding(itemPadding),
                 value = selectedValue,
                 onValueChange = { selectedValue = it; onValueChanged(it) },
                 label = { Text(name) },

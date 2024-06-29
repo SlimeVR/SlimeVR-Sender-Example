@@ -71,13 +71,37 @@ class UDPHandler {
     /**
      * Rotate IMU to the Quaternion's values
      */
-    suspend fun rotateIMU(imuID: Int, rotation: Quaternion): String {
+    suspend fun setImuRotation(imuID: Int, rotation: Quaternion): String {
         if (slimevrIp == broadcastIp) return "Server not found"
 
         // Rotate IMU
         sendPacket(packetBuilder.buildRotationPacket(imuID, rotation))
 
-        return "Rotated IMU $imuID"
+        return "Set rotation"
+    }
+
+    /**
+     * Set an IMU's flex resistance
+     */
+    suspend fun setImuFlexResistance(imuID: Int, flexResistance: Float): String {
+        if (slimevrIp == broadcastIp) return "Server not found"
+
+        // Set IMU flex resistance
+        sendPacket(packetBuilder.buildFlexResistancePacket(imuID, flexResistance))
+
+        return "Set flex resistance"
+    }
+
+    /**
+     * Set an IMU's flex angle
+     */
+    suspend fun setImuFlexAngle(imuID: Int, flexAngle: Float): String {
+        if (slimevrIp == broadcastIp) return "Server not found"
+
+        // Set IMU flex angle
+        sendPacket(packetBuilder.buildFlexAnglePacket(imuID, flexAngle))
+
+        return "Set flex angle"
     }
 
     /**

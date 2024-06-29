@@ -56,4 +56,22 @@ class PacketBuilder {
             put(0.toByte())                     // Calibration info
         }.array()
     }
+
+    fun buildFlexResistancePacket(imuID: Int, flexResistance: Float): ByteArray {
+        return ByteBuffer.allocate(128).apply {
+            putInt(24)                          // packet 24 header
+            putLong(packetID.getAndIncrement()) // packet counter
+            put(imuID.toByte())                 // tracker id
+            putFloat(flexResistance)            // flex resistance value
+        }.array()
+    }
+
+    fun buildFlexAnglePacket(imuID: Int, flexAngle: Float): ByteArray {
+        return ByteBuffer.allocate(128).apply {
+            putInt(25)                          // packet 25 header
+            putLong(packetID.getAndIncrement()) // packet counter
+            put(imuID.toByte())                 // tracker id
+            putFloat(flexAngle)                 // flex angle value
+        }.array()
+    }
 }
