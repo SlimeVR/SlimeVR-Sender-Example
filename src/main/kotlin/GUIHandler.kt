@@ -10,7 +10,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.*
-import kotlin.random.Random
 import kotlin.reflect.KSuspendFunction0
 
 class GUIHandler(private val composableScope: CoroutineScope, private val udpHandler: UDPHandler) {
@@ -38,47 +37,51 @@ class GUIHandler(private val composableScope: CoroutineScope, private val udpHan
     private fun displayContent() {
         Column(Modifier.padding(itemPadding).fillMaxWidth()) {
             Row {
-                var imuType = IMUType.BNO085.toString()
+                var imuType = IMUType.UNKNOWN.toString()
                 var boardType = BoardType.SLIMEVR.toString()
                 var mcuType = MCUType.ESP32.toString()
+                var trackerPosition = TrackerPosition.NONE.toString()
+                var dataSupport = DataSupport.ROTATION.toString()
 
                 suspend fun handshake(): String {
                     return udpHandler.handshake(
                         IMUType.valueOf(imuType),
                         BoardType.valueOf(boardType),
-                        MCUType.valueOf(mcuType)
+                        MCUType.valueOf(mcuType),
+                        TrackerPosition.valueOf(trackerPosition).id,
+                        DataSupport.valueOf(dataSupport).id,
                     )
                 }
                 createButton("Handshake", "Searching...", ::handshake, false)
 
-                fun imuSelected(value: String) {
-                    imuType = value
-                }
+                fun imuSelected(value: String) { imuType = value }
                 createDropdown("IMU type", IMUType.getList(), imuType, ::imuSelected)
 
-                fun boardSelected(value: String) {
-                    boardType = value
-                }
-                createDropdown("Board type", BoardType.getList(), boardType, ::boardSelected)
+                fun trackerPositionSelected(value: String) { trackerPosition = value }
+                createDropdown("Tracker position", TrackerPosition.getList(), trackerPosition, ::trackerPositionSelected)
 
-                fun mcuSelected(value: String) {
-                    mcuType = value
-                }
-                createDropdown("MCU type", MCUType.getList(), mcuType, ::mcuSelected)
+                fun dataSupportSelected(value: String) { dataSupport = value }
+                createDropdown("Data support", DataSupport.getList(), dataSupport, ::dataSupportSelected)
             }
 
             Row {
-                var imuAddType = IMUType.BNO085.toString()
+                var imuType = IMUType.UNKNOWN.toString()
+                var trackerPosition = TrackerPosition.NONE.toString()
+                var dataSupport = DataSupport.ROTATION.toString()
 
                 suspend fun addIMU(): String {
-                    return udpHandler.addIMU(IMUType.valueOf(imuAddType))
+                    return udpHandler.addIMU(IMUType.valueOf(imuType), TrackerPosition.valueOf(trackerPosition).id, DataSupport.valueOf(dataSupport).id)
                 }
                 createButton("Add IMU", null, ::addIMU)
 
-                fun imuAddSelected(value: String) {
-                    imuAddType = value
-                }
-                createDropdown("IMU type", IMUType.getList(), imuAddType, ::imuAddSelected)
+                fun imuAddSelected(value: String) { imuType = value }
+                createDropdown("IMU type", IMUType.getList(), imuType, ::imuAddSelected)
+
+                fun trackerPositionSelected(value: String) { trackerPosition = value }
+                createDropdown("Tracker position", TrackerPosition.getList(), trackerPosition, ::trackerPositionSelected)
+
+                fun dataSupportSelected(value: String) { dataSupport = value }
+                createDropdown("Data support", DataSupport.getList(), dataSupport, ::dataSupportSelected)
             }
 
             Row {
@@ -88,78 +91,43 @@ class GUIHandler(private val composableScope: CoroutineScope, private val udpHan
                 var rotZ = 0f
 
                 suspend fun setRotation(): String {
-                    return udpHandler.setImuRotation(
+                    return udpHandler.setSensorRotation(
                         imuID,
                         EulerAngles(EulerOrder.YZX, rotX / DEG_TO_RADIANS, rotY / DEG_TO_RADIANS, rotZ / DEG_TO_RADIANS).toQuaternion()
                     )
                 }
                 createButton("Set rotation", null, ::setRotation)
 
-                fun imuIDChanged(value: String) {
-                    imuID = value.toIntOrNull() ?: 0
-                }
+                fun imuIDChanged(value: String) { imuID = value.toIntOrNull() ?: 0 }
                 createInput("IMU ID", imuID.toString(), ::imuIDChanged)
 
-                fun rotXChanged(value: String) {
-                    rotX = value.toFloatOrNull() ?: 0f
-                }
+                fun rotXChanged(value: String) { rotX = value.toFloatOrNull() ?: 0f }
                 createInput("Rotation X", rotX.toString(), ::rotXChanged)
 
-                fun rotYChanged(value: String) {
-                    rotY = value.toFloatOrNull() ?: 0f
-                }
+                fun rotYChanged(value: String) { rotY = value.toFloatOrNull() ?: 0f }
                 createInput("Rotation Y", rotY.toString(), ::rotYChanged)
 
-                fun rotZChanged(value: String) {
-                    rotZ = value.toFloatOrNull() ?: 0f
-                }
+                fun rotZChanged(value: String) { rotZ = value.toFloatOrNull() ?: 0f }
                 createInput("Rotation Z", rotZ.toString(), ::rotZChanged)
             }
 
             Row {
                 var imuID = 0
-                var flexResistance = 0f
+                var flexData = 0f
 
                 suspend fun setResistance(): String {
-                    return udpHandler.setImuFlexResistance(
+                    return udpHandler.setSensorFlexData(
                         imuID,
-                        flexResistance
+                        flexData
                     )
                 }
-                createButton("Set flex resistance", null, ::setResistance)
+                createButton("Set flex data", null, ::setResistance)
 
-                fun imuIDChanged(value: String) {
-                    imuID = value.toIntOrNull() ?: 0
-                }
+                fun imuIDChanged(value: String) { imuID = value.toIntOrNull() ?: 0 }
                 createInput("IMU ID", imuID.toString(), ::imuIDChanged)
 
-                fun flexResistanceChanged(value: String) {
-                    flexResistance = value.toFloatOrNull() ?: 0f
-                }
-                createInput("Resistance (Ω)", flexResistance.toString(), ::flexResistanceChanged)
-            }
-
-            Row {
-                var imuID = 0
-                var flexAngle = 0f
-
-                suspend fun setAngle(): String {
-                    return udpHandler.setImuFlexAngle(
-                        imuID,
-                        flexAngle / DEG_TO_RADIANS
-                    )
-                }
-                createButton("Set flex angle", null, ::setAngle)
-
-                fun imuIDChanged(value: String) {
-                    imuID = value.toIntOrNull() ?: 0
-                }
-                createInput("IMU ID", imuID.toString(), ::imuIDChanged)
-
-                fun flexAngleChanged(value: String) {
-                    flexAngle = value.toFloatOrNull() ?: 0f
-                }
-                createInput("Angle (deg)", flexAngle.toString(), ::flexAngleChanged)
+                fun flexResistanceChanged(value: String) { flexData = value.toFloatOrNull() ?: 0f }
+                createInput("Resistance (Ω) / Angle (deg)", flexData.toString(), ::flexResistanceChanged)
             }
         }
     }

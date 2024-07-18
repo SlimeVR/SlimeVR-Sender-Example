@@ -37,14 +37,14 @@ class UDPHandler {
     /**
      * Returns the IP of the SlimeVR server after discovering it.
      */
-    suspend fun handshake(imuType: IMUType, boardType: BoardType, mcuType: MCUType): String {
+    suspend fun handshake(imuType: IMUType, boardType: BoardType, mcuType: MCUType, trackerPosition: Int = 0, dataSupport: Int = 0): String {
         // Reset IP to broadcast
         slimevrIp = broadcastIp
 
         var result = ""
         while (result == "") {
             // Send the SlimeVR Handshake
-            sendPacket(packetBuilder.buildHandshakePacket(imuType, boardType, mcuType))
+            sendPacket(packetBuilder.buildHandshakePacket(imuType, boardType, mcuType, trackerPosition, dataSupport))
 
             // Listen for a UDP response
             CoroutineScope(coroutineContext).launch { result = listenForHandshake() }
@@ -59,11 +59,11 @@ class UDPHandler {
     /**
      * Adds another IMU
      */
-    suspend fun addIMU(imuType: IMUType): String {
+    suspend fun addIMU(imuType: IMUType, trackerPosition: Int = 0, dataSupport: Int = 0): String {
         if (slimevrIp == broadcastIp) return "Server not found"
 
         // Add an IMU
-        sendPacket(packetBuilder.buildImuPacket(imuType))
+        sendPacket(packetBuilder.buildSensorInfoPacket(imuType, trackerPosition, dataSupport))
 
         return "Added IMU"
     }
@@ -71,7 +71,7 @@ class UDPHandler {
     /**
      * Rotate IMU to the Quaternion's values
      */
-    suspend fun setImuRotation(imuID: Int, rotation: Quaternion): String {
+    suspend fun setSensorRotation(imuID: Int, rotation: Quaternion): String {
         if (slimevrIp == broadcastIp) return "Server not found"
 
         // Rotate IMU
@@ -83,25 +83,13 @@ class UDPHandler {
     /**
      * Set an IMU's flex resistance
      */
-    suspend fun setImuFlexResistance(imuID: Int, flexResistance: Float): String {
+    suspend fun setSensorFlexData(imuID: Int, flexResistance: Float): String {
         if (slimevrIp == broadcastIp) return "Server not found"
 
         // Set IMU flex resistance
-        sendPacket(packetBuilder.buildFlexResistancePacket(imuID, flexResistance))
+        sendPacket(packetBuilder.buildFlexDataPacket(imuID, flexResistance))
 
         return "Set flex resistance"
-    }
-
-    /**
-     * Set an IMU's flex angle
-     */
-    suspend fun setImuFlexAngle(imuID: Int, flexAngle: Float): String {
-        if (slimevrIp == broadcastIp) return "Server not found"
-
-        // Set IMU flex angle
-        sendPacket(packetBuilder.buildFlexAnglePacket(imuID, flexAngle))
-
-        return "Set flex angle"
     }
 
     /**

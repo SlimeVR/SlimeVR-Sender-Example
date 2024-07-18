@@ -18,7 +18,7 @@ class PacketBuilder {
             putInt(0)
         }.array()
 
-    fun buildHandshakePacket(imuType: IMUType, boardType: BoardType, mcuType: MCUType): ByteArray {
+    fun buildHandshakePacket(imuType: IMUType, boardType: BoardType, mcuType: MCUType, trackerPosition: Int, dataSupport: Int): ByteArray {
         return ByteBuffer.allocate(128).apply {
             putInt(3)                                   // packet 3 header
             putLong(packetID.getAndIncrement())         // packet counter
@@ -30,16 +30,20 @@ class PacketBuilder {
             put(fwString.length.toByte())               // Length of fw string
             put(fwString.toByteArray(Charsets.UTF_8))   // fw string
             put(byteArrayOf(0x01, 0x02, 0x03, 0x04, 0x05, 0x06)) // MAC address
+                putInt(trackerPosition)                              // TrackerPosition
+                putInt(dataSupport)                                  // Data support
         }.array()
     }
 
-    fun buildImuPacket(imuType: IMUType): ByteArray {
+    fun buildSensorInfoPacket(imuType: IMUType, trackerPosition: Int, dataSupport: Int): ByteArray {
         return ByteBuffer.allocate(128).apply {
             putInt(15)                           // packet 15 header
             putLong(packetID.getAndIncrement()) // packet counter
             put(imuID.getAndIncrement().toByte())// tracker id (shown as IMU Tracker #x in SlimeVR)
             put(0.toByte())                     // sensor status
             put(imuType.id.toByte())            // imu type
+            putInt(trackerPosition)             // TrackerPosition
+            putInt(dataSupport)                 // Data support
         }.array()
     }
 
@@ -57,21 +61,12 @@ class PacketBuilder {
         }.array()
     }
 
-    fun buildFlexResistancePacket(imuID: Int, flexResistance: Float): ByteArray {
+    fun buildFlexDataPacket(imuID: Int, flexData: Float): ByteArray {
         return ByteBuffer.allocate(128).apply {
             putInt(24)                          // packet 24 header
             putLong(packetID.getAndIncrement()) // packet counter
             put(imuID.toByte())                 // tracker id
-            putFloat(flexResistance)            // flex resistance value
-        }.array()
-    }
-
-    fun buildFlexAnglePacket(imuID: Int, flexAngle: Float): ByteArray {
-        return ByteBuffer.allocate(128).apply {
-            putInt(25)                          // packet 25 header
-            putLong(packetID.getAndIncrement()) // packet counter
-            put(imuID.toByte())                 // tracker id
-            putFloat(flexAngle)                 // flex angle value
+            putFloat(flexData)            // flex data value
         }.array()
     }
 }
