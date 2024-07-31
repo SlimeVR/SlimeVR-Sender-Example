@@ -11,7 +11,7 @@ class PacketBuilder {
     private val fwString = "SlimeVR Sender Example"
     private val firmwareBuild = 1
     private var packetID = AtomicLong(1)
-    private var imuID = AtomicInteger(1)
+    private var addingTrackerId = AtomicInteger(1)
 
     val heartbeatPacket: ByteArray =
         ByteBuffer.allocate(28).apply {
@@ -39,7 +39,7 @@ class PacketBuilder {
         return ByteBuffer.allocate(128).apply {
             putInt(15)                           // packet 15 header
             putLong(packetID.getAndIncrement()) // packet counter
-            put(imuID.getAndIncrement().toByte())// tracker id (shown as IMU Tracker #x in SlimeVR)
+            put(addingTrackerId.getAndIncrement().toByte())// tracker id (shown as IMU Tracker #x in SlimeVR)
             put(0.toByte())                     // sensor status
             put(imuType.id.toByte())            // imu type
             putInt(trackerPosition)             // TrackerPosition
@@ -47,11 +47,11 @@ class PacketBuilder {
         }.array()
     }
 
-    fun buildRotationPacket(imuID: Int, rotation: Quaternion): ByteArray {
+    fun buildRotationPacket(trackerId: Int, rotation: Quaternion): ByteArray {
         return ByteBuffer.allocate(128).apply {
             putInt(17)                           // packet 17 header
             putLong(packetID.getAndIncrement()) // packet counter
-            put(imuID.toByte())                 // tracker id (shown as IMU Tracker #x in SlimeVR)
+            put(trackerId.toByte())                 // tracker id (shown as IMU Tracker #x in SlimeVR)
             put(1.toByte())                     // data type
             putFloat(rotation.x)                // Quaternion x
             putFloat(rotation.y)                // Quaternion y
@@ -61,11 +61,11 @@ class PacketBuilder {
         }.array()
     }
 
-    fun buildFlexDataPacket(imuID: Int, flexData: Float): ByteArray {
+    fun buildFlexDataPacket(trackerId: Int, flexData: Float): ByteArray {
         return ByteBuffer.allocate(128).apply {
             putInt(24)                          // packet 24 header
             putLong(packetID.getAndIncrement()) // packet counter
-            put(imuID.toByte())                 // tracker id
+            put(trackerId.toByte())                 // tracker id
             putFloat(flexData)            // flex data value
         }.array()
     }
