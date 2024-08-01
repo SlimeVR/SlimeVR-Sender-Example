@@ -19,6 +19,7 @@ class PacketBuilder {
         }.array()
 
     fun buildHandshakePacket(imuType: IMUType, boardType: BoardType, mcuType: MCUType, trackerPosition: Int, dataSupport: Int): ByteArray {
+        addingTrackerId.set(1)
         return ByteBuffer.allocate(128).apply {
             putInt(3)                                   // packet 3 header
             putLong(packetID.getAndIncrement())         // packet counter
