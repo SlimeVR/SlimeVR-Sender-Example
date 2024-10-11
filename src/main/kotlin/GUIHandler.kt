@@ -37,40 +37,31 @@ class GUIHandler(private val composableScope: CoroutineScope, private val udpHan
     private fun displayContent() {
         Column(Modifier.padding(itemPadding).fillMaxWidth()) {
             Row {
-                var imuType = IMUType.UNKNOWN.toString()
-                var boardType = BoardType.SLIMEVR.toString()
-                var mcuType = MCUType.ESP32.toString()
-                var trackerPosition = TrackerPosition.NONE.toString()
-                var dataSupport = DataSupport.ROTATION.toString()
+                var boardType = BoardType.SLIMEVR.name
+                var mcuType = MCUType.ESP32.name
 
                 suspend fun handshake(): String {
                     return udpHandler.handshake(
-                        IMUType.valueOf(imuType),
                         BoardType.valueOf(boardType),
                         MCUType.valueOf(mcuType),
-                        TrackerPosition.valueOf(trackerPosition).id,
-                        DataSupport.valueOf(dataSupport).id,
                     )
                 }
                 createButton("Handshake", "Searching...", ::handshake, false)
 
-                fun imuSelected(value: String) { imuType = value }
-                createDropdown("IMU type", IMUType.getList(), imuType, ::imuSelected)
+                fun boardSelected(value: String) { boardType = value }
+                createDropdown("Board type", BoardType.getList(), boardType, ::boardSelected)
 
-                fun trackerPositionSelected(value: String) { trackerPosition = value }
-                createDropdown("Tracker position", TrackerPosition.getList(), trackerPosition, ::trackerPositionSelected)
-
-                fun dataSupportSelected(value: String) { dataSupport = value }
-                createDropdown("Data support", DataSupport.getList(), dataSupport, ::dataSupportSelected)
+                fun mcuSelected(value: String) { mcuType = value }
+                createDropdown("MCU type", MCUType.getList(), mcuType, ::mcuSelected)
             }
 
             Row {
-                var imuType = IMUType.UNKNOWN.toString()
-                var trackerPosition = TrackerPosition.NONE.toString()
-                var dataSupport = DataSupport.ROTATION.toString()
+                var imuType = IMUType.UNKNOWN.name
+                var trackerPosition = TrackerPosition.NONE.name
+                var dataSupport = TrackerDataType.ROTATION.name
 
                 suspend fun addIMU(): String {
-                    return udpHandler.addIMU(IMUType.valueOf(imuType), TrackerPosition.valueOf(trackerPosition).id, DataSupport.valueOf(dataSupport).id)
+                    return udpHandler.addIMU(IMUType.valueOf(imuType), TrackerPosition.valueOf(trackerPosition), TrackerDataType.valueOf(dataSupport))
                 }
                 createButton("Add IMU", null, ::addIMU)
 
@@ -81,7 +72,7 @@ class GUIHandler(private val composableScope: CoroutineScope, private val udpHan
                 createDropdown("Tracker position", TrackerPosition.getList(), trackerPosition, ::trackerPositionSelected)
 
                 fun dataSupportSelected(value: String) { dataSupport = value }
-                createDropdown("Data support", DataSupport.getList(), dataSupport, ::dataSupportSelected)
+                createDropdown("Data type", TrackerDataType.getList(), dataSupport, ::dataSupportSelected)
             }
 
             Row {

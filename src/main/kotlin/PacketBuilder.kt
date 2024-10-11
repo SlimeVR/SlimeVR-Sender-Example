@@ -9,50 +9,48 @@ import java.util.concurrent.atomic.AtomicLong
  */
 class PacketBuilder {
     private val fwString = "SlimeVR Sender Example"
-    private val firmwareBuild = 1
+    private val protocolVersion = 18 // First version with dataType support
     private var packetID = AtomicLong(1)
-    private var addingTrackerId = AtomicInteger(1)
+    private var addingTrackerId = AtomicInteger(0)
 
     val heartbeatPacket: ByteArray =
         ByteBuffer.allocate(28).apply {
             putInt(0)
         }.array()
 
-    fun buildHandshakePacket(imuType: IMUType, boardType: BoardType, mcuType: MCUType, trackerPosition: Int, dataSupport: Int): ByteArray {
-        addingTrackerId.set(1)
+    fun buildHandshakePacket(boardType: BoardType, mcuType: MCUType): ByteArray {
+        addingTrackerId.set(0)
         return ByteBuffer.allocate(128).apply {
-            putInt(3)                                   // packet 3 header
-            putLong(packetID.getAndIncrement())         // packet counter
-            putInt(boardType.id)                        // Board type
-            putInt(imuType.id)                          // IMU type
-            putInt(mcuType.id)                          // MCU type
-            repeat(3) { putInt(0) }               // IMU info (unused)
-            putInt(firmwareBuild)                       // Firmware build
-            put(fwString.length.toByte())               // Length of fw string
-            put(fwString.toByteArray(Charsets.UTF_8))   // fw string
+            putInt(3)                           // packet 3 header
+            putLong(0)                          // packet counter
+            putInt(boardType.id)                      // Board type
+            putInt(0)                           // IMU type
+            putInt(mcuType.id)                        // MCU type
+            repeat(3) { putInt(0) }       // IMU info (unused)
+            putInt(protocolVersion)                   // Protocol version
+            put(fwString.length.toByte())             // Length of fw string
+            put(fwString.toByteArray(Charsets.UTF_8)) // fw string
             put(byteArrayOf(0x01, 0x02, 0x03, 0x04, 0x05, 0x06)) // MAC address
-                putInt(trackerPosition)                              // TrackerPosition
-                putInt(dataSupport)                                  // Data support
         }.array()
     }
 
-    fun buildSensorInfoPacket(imuType: IMUType, trackerPosition: Int, dataSupport: Int): ByteArray {
+    fun buildSensorInfoPacket(imuType: IMUType, trackerPosition: TrackerPosition?, dataType: TrackerDataType): ByteArray {
         return ByteBuffer.allocate(128).apply {
-            putInt(15)                           // packet 15 header
-            putLong(packetID.getAndIncrement()) // packet counter
-            put(addingTrackerId.getAndIncrement().toByte())// tracker id (shown as IMU Tracker #x in SlimeVR)
-            put(0.toByte())                     // sensor status
-            put(imuType.id.toByte())            // imu type
-            putInt(trackerPosition)             // TrackerPosition
-            putInt(dataSupport)                 // Data support
+            putInt(15)                         // packet 15 header
+            putLong(packetID.getAndIncrement())      // packet counter
+            put(addingTrackerId.getAndIncrement().toByte()) // tracker id (shown as IMU Tracker #x in SlimeVR)
+            put(0.toByte())                          // sensor status
+            put(imuType.id.toByte())                 // imu type
+            put((trackerPosition?.id ?: 0).toByte()) // TrackerPosition
+            put(dataType.id.toByte())                // Data type
         }.array()
     }
 
     fun buildRotationPacket(trackerId: Int, rotation: Quaternion): ByteArray {
         return ByteBuffer.allocate(128).apply {
-            putInt(17)                           // packet 17 header
+            putInt(17)                    // packet 17 header
             putLong(packetID.getAndIncrement()) // packet counter
-            put(trackerId.toByte())                 // tracker id (shown as IMU Tracker #x in SlimeVR)
+            put(trackerId.toByte())             // tracker id (shown as IMU Tracker #x in SlimeVR)
             put(1.toByte())                     // data type
             putFloat(rotation.x)                // Quaternion x
             putFloat(rotation.y)                // Quaternion y
@@ -64,10 +62,10 @@ class PacketBuilder {
 
     fun buildFlexDataPacket(trackerId: Int, flexData: Float): ByteArray {
         return ByteBuffer.allocate(128).apply {
-            putInt(24)                          // packet 24 header
+            putInt(24)                     // packet 24 header
             putLong(packetID.getAndIncrement()) // packet counter
-            put(trackerId.toByte())                 // tracker id
-            putFloat(flexData)            // flex data value
+            put(trackerId.toByte())             // tracker id
+            putFloat(flexData)                  // flex data value
         }.array()
     }
 }

@@ -37,14 +37,14 @@ class UDPHandler {
     /**
      * Returns the IP of the SlimeVR server after discovering it.
      */
-    suspend fun handshake(imuType: IMUType, boardType: BoardType, mcuType: MCUType, trackerPosition: Int = 0, dataSupport: Int = 0): String {
+    suspend fun handshake(boardType: BoardType, mcuType: MCUType): String {
         // Reset IP to broadcast
         slimevrIp = broadcastIp
 
         var result = ""
         while (result == "") {
             // Send the SlimeVR Handshake
-            sendPacket(packetBuilder.buildHandshakePacket(imuType, boardType, mcuType, trackerPosition, dataSupport))
+            sendPacket(packetBuilder.buildHandshakePacket(boardType, mcuType))
 
             // Listen for a UDP response
             CoroutineScope(coroutineContext).launch { result = listenForHandshake() }
@@ -59,11 +59,11 @@ class UDPHandler {
     /**
      * Adds another IMU
      */
-    suspend fun addIMU(imuType: IMUType, trackerPosition: Int = 0, dataSupport: Int = 0): String {
+    suspend fun addIMU(imuType: IMUType, trackerPosition: TrackerPosition?, dataType: TrackerDataType): String {
         if (slimevrIp == broadcastIp) return "Server not found"
 
         // Add an IMU
-        sendPacket(packetBuilder.buildSensorInfoPacket(imuType, trackerPosition, dataSupport))
+        sendPacket(packetBuilder.buildSensorInfoPacket(imuType, trackerPosition, dataType))
 
         return "Added IMU"
     }

@@ -9,6 +9,13 @@ enum class IMUType(val id: Int) {
     BNO086(7),
     BMI160(8),
     ICM20948(9),
+    ICM42688(10),
+    BMI270(11),
+    LSM6DS3TRC(12),
+    LSM6DSV(13),
+    LSM6DSO(14),
+    LSM6DSR(15),
+    DEV_RESERVED(250),
     ;
 
     companion object {
@@ -17,6 +24,11 @@ enum class IMUType(val id: Int) {
                 it.toString()
             }
         }
+
+        private val byId = entries.associateBy { it.id }
+
+        @JvmStatic
+        fun getById(id: Int): IMUType? = byId[id]
     }
 }
 
@@ -34,7 +46,37 @@ enum class BoardType(val id: Int) {
     LOLIN_C3_MINI(10),
     BEETLE32C32(11),
     ES32C3DEVKITM1(12),
+    OWOTRACK(13),
+    WRANGLER(14),
+    MOCOPI(15),
+    WEMOSWROOM02(16),
+    XIAO_ESP32C3(17),
+    HARITORA(18),
+    DEV_RESERVED(250),
     ;
+
+    override fun toString(): String = when (this) {
+        UNKNOWN -> "Unknown"
+        SLIMEVR_LEGACY -> "SlimeVR Legacy"
+        SLIMEVR_DEV -> "SlimeVR Dev"
+        NODEMCU -> "NodeMCU"
+        CUSTOM -> "Custom Board"
+        WROOM32 -> "WROOM32"
+        WEMOSD1MINI -> "Wemos D1 Mini"
+        TTGO_TBASE -> "TTGO T-Base"
+        ESP01 -> "ESP-01"
+        SLIMEVR -> "SlimeVR"
+        LOLIN_C3_MINI -> "Lolin C3 Mini"
+        BEETLE32C32 -> "Beetle ESP32-C3"
+        ES32C3DEVKITM1 -> "Espressif ESP32-C3 DevKitM-1"
+        OWOTRACK -> "owoTrack"
+        WRANGLER -> "Wrangler Joycons"
+        MOCOPI -> "Sony Mocopi"
+        WEMOSWROOM02 -> "Wemos Wroom-02 D1 Mini"
+        XIAO_ESP32C3 -> "Seeed Studio XIAO ESP32C3"
+        HARITORA -> "Haritora"
+        DEV_RESERVED -> "Prototype"
+    }
 
     companion object {
         fun getList(): List<String> {
@@ -42,6 +84,11 @@ enum class BoardType(val id: Int) {
                 it.toString()
             }
         }
+
+        private val byId = entries.associateBy { it.id }
+
+        @JvmStatic
+        fun getById(id: Int): BoardType? = byId[id]
     }
 }
 
@@ -49,6 +96,13 @@ enum class MCUType(val id: Int) {
     UNKNOWN(0),
     ESP8266(1),
     ESP32(2),
+    OWOTRACK_ANDROID(3),
+    WRANGLER(4),
+    OWOTRACK_IOS(5),
+    ESP32_C3(6),
+    MOCOPI(7),
+    HARITORA(8),
+    DEV_RESERVED(250),
     ;
 
     companion object {
@@ -57,6 +111,31 @@ enum class MCUType(val id: Int) {
                 it.toString()
             }
         }
+
+        private val byId = entries.associateBy { it.id }
+
+        @JvmStatic
+        fun getById(id: Int): MCUType? = byId[id]
+    }
+}
+
+enum class TrackerDataType(val id: Int) {
+    ROTATION(0),
+    FLEX_RESISTANCE(1),
+    FLEX_ANGLE(2),
+    ;
+
+    companion object {
+        fun getList(): List<String> {
+            return entries.map {
+                it.toString()
+            }
+        }
+
+        private val byId = entries.associateBy { it.id }
+
+        @JvmStatic
+        fun getById(id: Int): TrackerDataType? = byId[id]
     }
 }
 
@@ -112,21 +191,6 @@ enum class TrackerPosition(val id: Int) {
     RIGHT_LITTLE_PROXIMAL(48),
     RIGHT_LITTLE_INTERMEDIATE(49),
     RIGHT_LITTLE_DISTAL(50),
-    ;
-
-    companion object {
-        fun getList(): List<String> {
-            return entries.map {
-                it.toString()
-            }
-        }
-    }
-}
-
-enum class DataSupport(val id: Int) {
-    ROTATION(0),
-    FLEX_RESISTANCE(1),
-    FLEX_ANGLE(2),
     ;
 
     companion object {
