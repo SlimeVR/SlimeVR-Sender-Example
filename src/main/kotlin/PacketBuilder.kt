@@ -41,6 +41,7 @@ class PacketBuilder {
             put(addingTrackerId.getAndIncrement().toByte()) // tracker id (shown as IMU Tracker #x in SlimeVR)
             put(0.toByte())                          // sensor status
             put(imuType.id.toByte())                 // imu type
+            putShort(0)                        // Mag support
             put((trackerPosition?.id ?: 0).toByte()) // TrackerPosition
             put(dataType.id.toByte())                // Data type
         }.array()
