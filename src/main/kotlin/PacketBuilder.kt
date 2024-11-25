@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicLong
  */
 class PacketBuilder {
     private val fwString = "SlimeVR Sender Example"
-    private val protocolVersion = 18 // First version with dataType support
+    private val protocolVersion = 19 // First version with dataType support
     private var packetID = AtomicLong(1)
     private var addingTrackerId = AtomicInteger(0)
 
@@ -63,7 +63,7 @@ class PacketBuilder {
 
     fun buildFlexDataPacket(trackerId: Int, flexData: Float): ByteArray {
         return ByteBuffer.allocate(128).apply {
-            putInt(24)                     // packet 24 header
+            putInt(26)                     // packet 24 header
             putLong(packetID.getAndIncrement()) // packet counter
             put(trackerId.toByte())             // tracker id
             putFloat(flexData)                  // flex data value
